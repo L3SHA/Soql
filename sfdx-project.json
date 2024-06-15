@@ -1,0 +1,10 @@
+{
+  "packageDirectories": [
+    {
+      "path": "src",
+      "default": true
+    }
+  ],
+  "name": "Soql",
+  "namespace": ""
+}
