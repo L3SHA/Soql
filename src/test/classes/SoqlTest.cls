@@ -10,16 +10,14 @@ private class SoqlTest {
             Account account = new Account(
                 Name = 'Test ' + String.valueOf(i),
                 Description = 'Test ' + String.valueOf(i),
+                BillingLatitude = i + 1,
+                BillingLongitude = i + 1,
                 NumberOfEmployees = 100 * (i + 1)
             );
             accounts.add(account);
         }
         insert accounts;
     }
-
-    // private static Id getId() {
-    //     return fflib_IDGenerator.generate(Account.sObjectType);
-    // }
 
     @IsTest 
     private static void validateSelect() {
@@ -36,29 +34,29 @@ private class SoqlTest {
         );
     }
 
-    // @IsTest 
-    // private static void validateSelectFilter() {
-    //     List<Account> result = Soql.fetch(OBJECT_NAME).filter('NumberOfEmployees', (Double)100).query();
-    //     Assert.areEqual(1, result.size());
-    // }
+    @IsTest 
+    private static void validateSelectFilter() {
+        List<Account> result = Soql.fetch(OBJECT_NAME).filter('BillingLatitude', (Double)1).query();
+        Assert.areEqual(1, result.size());
+    }
 
-    // @IsTest 
-    // private static void validateSelectFilterIn() {
-    //     List<Account> result = Soql.fetch(OBJECT_NAME).field('Name').filter('NumberOfEmployees', new Double[] {100, 200, 300}).query();
-    //     Assert.areEqual(3, result.size());
-    // }
+    @IsTest 
+    private static void validateSelectFilterIn() {
+        List<Account> result = Soql.fetch(OBJECT_NAME).field('Name').filter('BillingLatitude', new Double[] {1, 2, 3}).query();
+        Assert.areEqual(3, result.size());
+    }
 
-    // @IsTest 
-    // private static void validateSelectNegativeFilter() {
-    //     List<Account> result = Soql.fetch(OBJECT_NAME).field('Name').filterNot('NumberOfEmployees', 100).query();
-    //     Assert.areEqual(TEST_SIZE - 1, result.size());
-    // }
+    @IsTest 
+    private static void validateSelectNegativeFilter() {
+        List<Account> result = Soql.fetch(OBJECT_NAME).field('Name').filterNot('BillingLatitude', 1).query();
+        Assert.areEqual(TEST_SIZE - 1, result.size());
+    }
 
-    // @IsTest 
-    // private static void validateSelectNegativeFilterIn() {
-    //     List<Account> result = Soql.fetch(OBJECT_NAME).field('Name').filterNot('NumberOfEmployees', new Double[] {100, 200, 300}).query();
-    //     Assert.areEqual(TEST_SIZE - 3, result.size());
-    // }
+    @IsTest 
+    private static void validateSelectNegativeFilterIn() {
+        List<Account> result = Soql.fetch(OBJECT_NAME).field('Name').filterNot('BillingLatitude', new Double[] {1, 2, 3}).query();
+        Assert.areEqual(TEST_SIZE - 3, result.size());
+    }
 
     @IsTest 
     private static void filterTypeBoolean() {
@@ -152,20 +150,20 @@ private class SoqlTest {
         Assert.areEqual(100.00, result.get(0).NumberOfEmployees);
     }
 
-    // @IsTest 
-    // private static void validateComplexBuild() {
-    //     List<Account> result = Soql.fetch(OBJECT_NAME)
-    //         .field('Name')
-    //         .fields(new String[]{'Id', 'CreatedDate'})
-    //         .filter('NumberOfEmployees', '>', 500.00)
-    //         .filter('NumberOfEmployees', '<', TEST_SIZE * 100)
-    //         .filter('IsDeleted', false)
-    //         .withLimit(10)
-    //         .fromOffset(5)
-    //         .query();
+    @IsTest 
+    private static void validateComplexBuild() {
+        List<Account> result = Soql.fetch(OBJECT_NAME)
+            .field('Name')
+            .fields(new String[]{'Id', 'CreatedDate'})
+            .filter('BillingLatitude', '>', 5.00)
+            .filter('BillingLatitude', '<', TEST_SIZE)
+            .filter('IsDeleted', false)
+            .withLimit(10)
+            .fromOffset(5)
+            .query();
 
-    //     Assert.areEqual('Test 10', result.get(0).Name);
-    // }
+        Assert.areEqual('Test 10', result.get(0).Name);
+    }
 
     @IsTest 
     private static void sessionCache() {
@@ -215,15 +213,15 @@ private class SoqlTest {
         );
     }
 
-    // @IsTest 
-    //private static void prepareId() {
-    //     String query = 'SELECT Id FROM Something WHERE Id=:id';
-    //     Id testId = getId();
-    //     Assert.areEqual(
-    //         query.replace(':id', '\'' + testId + '\''),
-    //         new Soql.Query(query, new Map<String, Id> {'id' => testId}).prepare()
-    //     );
-    // }
+    @IsTest 
+    private static void prepareId() {
+        String query = 'SELECT Id FROM Something WHERE Id=:id';
+        Id testId = SoqlHelper.getFakeId(Account.sObjectType);
+        Assert.areEqual(
+            query.replace(':id', '\'' + testId + '\''),
+            new Soql.Query(query, new Map<String, Id> {'id' => testId}).prepare()
+        );
+    }
 
     @IsTest 
     private static void prepareStringList() {
@@ -234,15 +232,15 @@ private class SoqlTest {
         );
     }
 
-    // @IsTest 
-    //private static void prepareIdList() {
-    //     String query = 'SELECT Id FROM Something WHERE Name IN :ids';
-    //     Id id = getId();
-    //     Assert.areEqual(
-    //         query.replace(':ids', '(\'' + String.valueOf(id) + '\')'),
-    //         new Soql.Query(query, new Map<String, Object> {'ids' => new List<Id>{id}}).prepare()
-    //     );
-    // }
+    @IsTest 
+    private static void prepareIdList() {
+        String query = 'SELECT Id FROM Something WHERE Name IN :ids';
+        Id id = SoqlHelper.getFakeId(Account.sObjectType);
+        Assert.areEqual(
+            query.replace(':ids', '(\'' + String.valueOf(id) + '\')'),
+            new Soql.Query(query, new Map<String, Object> {'ids' => new List<Id>{id}}).prepare()
+        );
+    }
 
     @IsTest 
     private static void prepareDateList() {
@@ -346,13 +344,52 @@ private class SoqlTest {
         );
     }
 
-    // @IsTest 
-    // private static void prepareIdSet() {
-    //     String query = 'SELECT Id FROM Something WHERE Name IN :ids';
-    //     Id id = RecordTypeHelper.ACCOUNT_BUSINESS;
-    //     Assert.areEqual(
-    //         query.replace(':ids', '(\'' + String.valueOf(id) + '\')'),
-    //         new Soql.Query(query, new Map<String, Object> {'ids' => new Set<Id>{id}}).prepare()
-    //     );
-    // }
+    @IsTest
+    private static void queryOneRecord() {
+        Account account = (Account) Soql.fetch(OBJECT_NAME).field('Name').queryOne();
+        Assert.areNotEqual(null, account);
+    }
+
+    @IsTest
+    private static void queryOneRecordNotFound() {
+        Account account = (Account) Soql.fetch(OBJECT_NAME).field('Name').filter('Name', 'Test Fake').queryOne();
+        Assert.areEqual(null, account);
+    }
+
+    @IsTest
+    private static void selectFieldsFromOneString() {
+        List<Account> accounts = (List<Account>) Soql.fetch(OBJECT_NAME).fields('Name, NumberOfEmployees').query();
+        Assert.areEqual(TEST_SIZE, accounts.size());
+    }
+
+    @IsTest
+    private static void selectFieldsFromStringSet() {
+        Set<String> fields = new Set<String>{'Name', 'NumberOfEmployees'};
+        List<Account> accounts = (List<Account>) Soql.fetch(OBJECT_NAME).fields(fields).query();
+        Assert.areEqual(TEST_SIZE, accounts.size());
+    }
+
+    @IsTest
+    private static void selectFieldsFromStringList() {
+        List<SObjectField> fields = new List<SObjectField>{Account.Name, Account.NumberOfEmployees};
+        List<Account> accounts = (List<Account>) Soql.fetch(Account.sObjectType).fields(fields).query();
+        Assert.areEqual(TEST_SIZE, accounts.size());
+    }
+
+    @IsTest
+    private static void getObjectFields() {
+        List<String> allFields = Soql.getAllFieldsForObject('Account', true);
+        List<String> fieldsEditable = Soql.getAllFieldsForObject('Account', false);
+        Assert.areNotEqual(fieldsEditable, allFields);
+    }
+
+    @IsTest 
+    private static void prepareIdSet() {
+        String query = 'SELECT Id FROM Something WHERE Name IN :ids';
+        Id id = SoqlHelper.getFakeId(Account.sObjectType);
+        Assert.areEqual(
+            query.replace(':ids', '(\'' + String.valueOf(id) + '\')'),
+            new Soql.Query(query, new Map<String, Object> {'ids' => new Set<Id>{id}}).prepare()
+        );
+    }
 }

@@ -68,6 +68,11 @@ public without sharing class SoqlHelper {
         }
     }
 
+    public static Id getFakeId(Schema.SObjectType sobjectType) {
+        String keyPrefix = sobjectType.getDescribe().getKeyPrefix();
+		return Id.valueOf(keyPrefix + '000000000000');
+    }
+
     public class DatabaseCacheInventory {
         private Map<String, InventoryItem> items = new Map<String, InventoryItem>();
 
